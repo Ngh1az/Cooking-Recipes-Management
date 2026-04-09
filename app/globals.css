@@ -1,26 +1,218 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fffaf2;
+  --surface: #ffffff;
+  --foreground: #1f2937;
+  --muted-foreground: #6b7280;
+  --brand: #dd6b20;
+  --brand-strong: #c05621;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
   --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+body {
+  background:
+    radial-gradient(circle at 20% 20%, #fff1dd 0%, transparent 40%),
+    radial-gradient(circle at 80% 0%, #ffe8cf 0%, transparent 35%),
+    var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), "Segoe UI", sans-serif;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes menu-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96);
+  }
+  68% {
+    opacity: 1;
+    transform: translateY(0) scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes menu-close {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+}
+
+@keyframes menu-item-in {
+  from {
+    opacity: 0;
+    transform: translateX(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlay-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes avatar-ripple {
+  from {
+    opacity: 0.45;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(8);
+  }
+}
+
+.fx-fade-up {
+  opacity: 0;
+  animation: fade-up 0.55s ease-out forwards;
+}
+
+.fx-stagger {
+  animation-delay: calc(var(--d, 0) * 80ms);
+}
+
+.fx-float {
+  animation: float-slow 4s ease-in-out infinite;
+}
+
+.fx-shimmer {
+  background: linear-gradient(90deg, #fef3c7 0%, #fff7ed 45%, #fef3c7 100%);
+  background-size: 220% 100%;
+  animation: shimmer 2.8s linear infinite;
+}
+
+.fx-lift {
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.fx-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 32px rgba(234, 88, 12, 0.16);
+}
+
+.fx-glow:hover {
+  box-shadow:
+    0 0 0 1px rgba(251, 146, 60, 0.35),
+    0 16px 36px rgba(251, 146, 60, 0.2);
+}
+
+.fx-account-overlay {
+  animation: overlay-in 160ms ease-out;
+}
+
+.fx-account-overlay-closing {
+  animation: overlay-out 150ms ease-out forwards;
+}
+
+.fx-account-menu {
+  transform-origin: top right;
+  animation: menu-pop 300ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.fx-account-menu-closing {
+  transform-origin: top right;
+  animation: menu-close 170ms ease-in forwards;
+}
+
+.fx-account-item {
+  opacity: 0;
+  animation: menu-item-in 220ms ease-out forwards;
+}
+
+.fx-account-item:nth-child(1) {
+  animation-delay: 35ms;
+}
+
+.fx-account-item:nth-child(2) {
+  animation-delay: 70ms;
+}
+
+.fx-account-item:nth-child(3) {
+  animation-delay: 105ms;
+}
+
+.fx-avatar-ripple {
+  position: absolute;
+  border-radius: 9999px;
+  width: 16px;
+  height: 16px;
+  background: rgba(251, 146, 60, 0.45);
+  pointer-events: none;
+  animation: avatar-ripple 560ms ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-account-overlay,
+  .fx-account-menu,
+  .fx-account-item,
+  .fx-fade-up,
+  .fx-float,
+  .fx-shimmer {
+    animation: none !important;
+  }
 }
