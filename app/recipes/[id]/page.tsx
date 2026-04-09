@@ -87,7 +87,6 @@ export default async function Page({
         >
           ← Back to recipes
         </Link>
-        <p className="text-xs text-gray-500">Recipe #{recipe.id}</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.7fr_1fr]">
@@ -106,9 +105,6 @@ export default async function Page({
               <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-900">
                 Media
               </h2>
-              <span className="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-700">
-                {hasVideo ? "Video Guide" : hasImage ? "Photo" : "No Media"}
-              </span>
             </div>
 
             {hasVideo || hasImage ? (
@@ -158,12 +154,6 @@ export default async function Page({
                 </div>
               </div>
             )}
-
-            <p className="text-sm text-gray-500">
-              {hasVideo
-                ? "Step-by-step video guide is available for this recipe."
-                : "No video yet. You can add a cooking tutorial video in the next phase."}
-            </p>
           </section>
 
           <section className="space-y-4">
@@ -265,9 +255,6 @@ export default async function Page({
             <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-900">
               Rate This Recipe
             </h2>
-            <p className="mt-1 text-sm text-gray-600">
-              Your rating helps others find the best recipes faster.
-            </p>
             <div className="mt-3 rounded-xl border border-amber-200 bg-white p-3">
               <RatingStars
                 id={resolvedParams.id}
@@ -278,50 +265,11 @@ export default async function Page({
             </div>
           </section>
 
-          <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-900">
-              Recipe Stats
-            </h2>
-            <dl className="mt-3 space-y-3 text-sm">
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-gray-500">Ingredients</dt>
-                <dd className="font-semibold text-gray-900">
-                  {ingredients.length}
-                </dd>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-gray-500">Steps</dt>
-                <dd className="font-semibold text-gray-900">{steps.length}</dd>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-gray-500">Community Likes</dt>
-                <dd className="font-semibold text-gray-900">
-                  {Number(data.likes ?? 0)}
-                </dd>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-gray-500">Photo</dt>
-                <dd className="font-semibold text-gray-900">
-                  {imageUrls.length}
-                </dd>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-gray-500">Video Guide</dt>
-                <dd className="font-semibold text-gray-900">
-                  {videoUrls.length}
-                </dd>
-              </div>
-            </dl>
-          </section>
-
           {data.viewer_can_edit ? (
             <section className="rounded-2xl border border-red-100 bg-red-50/50 p-5">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-red-700">
                 Manage Recipe
               </h2>
-              <p className="mt-2 text-sm text-red-700/80">
-                Update this recipe or remove it if it is outdated or incorrect.
-              </p>
               <div className="mt-3 flex flex-col gap-2">
                 <Link
                   href={`/recipes/${resolvedParams.id}/edit`}

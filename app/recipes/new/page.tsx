@@ -134,9 +134,6 @@ export default function Page() {
     <div className="mx-auto max-w-2xl rounded-2xl border border-orange-100 bg-white p-6 shadow-sm sm:p-8">
       <div className="mb-6 border-b border-orange-100 pb-4">
         <h1 className="text-2xl font-bold text-gray-900">Create New Recipe</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Share your favorite dish with the community.
-        </p>
       </div>
 
       <div className="space-y-5">
@@ -178,7 +175,7 @@ export default function Page() {
             htmlFor="ingredients"
             className="mb-2 block text-sm font-medium text-gray-700"
           >
-            Ingredients (one per line)
+            Ingredients
           </label>
           <textarea
             id="ingredients"
@@ -195,7 +192,7 @@ export default function Page() {
             htmlFor="steps"
             className="mb-2 block text-sm font-medium text-gray-700"
           >
-            Steps (one per line)
+            Steps
           </label>
           <textarea
             id="steps"
@@ -214,7 +211,7 @@ export default function Page() {
             htmlFor="image"
             className="mb-2 block text-sm font-medium text-gray-700"
           >
-            Recipe Images (optional, multiple)
+            Images (optional)
           </label>
           <input
             id="image"
@@ -244,7 +241,7 @@ export default function Page() {
             htmlFor="videoFiles"
             className="mb-2 block text-sm font-medium text-gray-700"
           >
-            Recipe Videos (optional, upload from device)
+            Videos (optional)
           </label>
           <input
             id="videoFiles"

@@ -45,7 +45,6 @@ export default async function Page({
 
   const data = await res.json();
   const recipes: Recipe[] = data.data || [];
-  const pageSize = Number(data.limit) || 6;
   const recipeEmojis = ["🥪", "🥗", "🍲", "🍰", "🥩", "🍝"];
   const fallbackBackgrounds = [
     "from-amber-100 via-orange-50 to-rose-100",
@@ -63,9 +62,7 @@ export default async function Page({
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
             Recipes
           </h1>
-          <p className="text-gray-500 mt-1">
-            Discover, create, and share your favorite culinary delights.
-          </p>
+          <p className="mt-1 text-gray-500">Find, cook, enjoy.</p>
         </div>
 
         <Link
@@ -108,7 +105,7 @@ export default async function Page({
         </svg>
         <input
           name="q"
-          placeholder="Search for recipes, ingredients..."
+          placeholder="Search recipes..."
           defaultValue={q}
           className="w-full rounded-full border border-gray-300 bg-white py-3 pl-10 pr-24 text-sm shadow-sm transition-shadow focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
         />
@@ -149,10 +146,6 @@ export default async function Page({
 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
 
-                <div className="absolute left-3 top-3 rounded-full border border-white/60 bg-white/80 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-orange-700 backdrop-blur-sm">
-                  Recipe #{(page - 1) * pageSize + index + 1}
-                </div>
-
                 <div className="absolute right-3 top-3">
                   <LikeButton
                     id={String(r.id)}
@@ -168,10 +161,7 @@ export default async function Page({
               </div>
 
               <div className="flex flex-1 flex-col p-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-orange-600/90">
-                  Community favorite
-                </p>
-                <p className="mt-2 flex-1 text-sm leading-6 text-gray-600 line-clamp-3">
+                <p className="flex-1 text-sm leading-6 text-gray-600 line-clamp-3">
                   {r.description ||
                     "No description available for this delicious recipe."}
                 </p>
@@ -179,9 +169,6 @@ export default async function Page({
                 <div className="mt-5 flex items-center gap-2">
                   <span className="inline-flex items-center rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-700">
                     {r.likes ?? 0} likes
-                  </span>
-                  <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-600">
-                    Chef picks
                   </span>
                 </div>
 
@@ -211,10 +198,10 @@ export default async function Page({
           <h3 className="text-lg font-medium text-gray-900">
             No recipes found
           </h3>
-          <p className="mt-1 text-sm text-gray-500 max-w-sm">
+          <p className="mt-1 max-w-sm text-sm text-gray-500">
             {q
-              ? `We couldn't find anything matching "${q}". Try adjusting your search.`
-              : "Looks like your recipe box is empty. Time to add your first creation!"}
+              ? `No result for "${q}".`
+              : "No recipe yet. Create your first one."}
           </p>
           {q && (
             <Link

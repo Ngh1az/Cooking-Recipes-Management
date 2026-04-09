@@ -281,9 +281,6 @@ export default function Page() {
 
       <div className="mb-6 border-b border-orange-100 pb-4">
         <h1 className="text-2xl font-bold text-gray-900">Edit Recipe</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Update your recipe details and media.
-        </p>
       </div>
 
       {loading ? (
@@ -328,7 +325,7 @@ export default function Page() {
               htmlFor="ingredients"
               className="mb-2 block text-sm font-medium text-gray-700"
             >
-              Ingredients (one per line)
+              Ingredients
             </label>
             <textarea
               id="ingredients"
@@ -345,7 +342,7 @@ export default function Page() {
               htmlFor="steps"
               className="mb-2 block text-sm font-medium text-gray-700"
             >
-              Steps (one per line)
+              Steps
             </label>
             <textarea
               id="steps"
@@ -364,9 +361,7 @@ export default function Page() {
               <label className="text-sm font-medium text-gray-700">
                 Current Images
               </label>
-              <span className="text-xs text-gray-500">
-                Remove old images individually, then add new ones.
-              </span>
+              <span className="text-xs text-gray-500">Remove or add.</span>
             </div>
 
             {existingImageUrls.length > 0 ? (
@@ -430,9 +425,7 @@ export default function Page() {
                   ))}
                 </div>
               ) : (
-                <p className="mt-2 text-xs text-gray-500">
-                  New images will be added to the recipe.
-                </p>
+                <p className="mt-2 text-xs text-gray-500">Add new images.</p>
               )}
             </div>
           </div>
@@ -442,9 +435,7 @@ export default function Page() {
               <label className="text-sm font-medium text-gray-700">
                 Current Videos
               </label>
-              <span className="text-xs text-gray-500">
-                Remove old videos individually, then add new ones.
-              </span>
+              <span className="text-xs text-gray-500">Remove or add.</span>
             </div>
 
             {existingVideoUrls.length > 0 ? (
@@ -512,9 +503,7 @@ export default function Page() {
                   ))}
                 </div>
               ) : (
-                <p className="mt-2 text-xs text-gray-500">
-                  New videos will be added to the recipe.
-                </p>
+                <p className="mt-2 text-xs text-gray-500">Add new videos.</p>
               )}
             </div>
           </div>

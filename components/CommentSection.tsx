@@ -21,7 +21,9 @@ export default function CommentSection({ recipeId }: { recipeId: string }) {
 
     fetch(`/api/recipes/${recipeId}/comments`)
       .then((res) => res.json())
-      .then((data) => setComments(data.data ?? []))
+      .then((data) => {
+        setComments(data.data ?? []);
+      })
       .catch(() => setError("Unable to load comments."))
       .finally(() => setLoading(false));
   }, [recipeId]);
@@ -111,7 +113,10 @@ export default function CommentSection({ recipeId }: { recipeId: string }) {
               <p className="text-xs font-medium text-orange-700">
                 {c.author_name}
               </p>
-              <p className="text-sm leading-6 text-gray-700">{c.content}</p>
+              <p className="min-w-0 break-words whitespace-pre-wrap text-sm leading-6 text-gray-700 [overflow-wrap:anywhere]">
+                {c.content}
+              </p>
+
               <div className="mt-3">
                 <button
                   onClick={() => handleDelete(c.id)}
