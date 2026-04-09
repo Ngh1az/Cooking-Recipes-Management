@@ -245,7 +245,6 @@ export default async function Page({
             <div className="mt-4 rounded-xl border border-orange-100 bg-orange-50/50 p-3">
               <LikeButton
                 id={resolvedParams.id}
-                initialLikes={data.likes}
                 initialLiked={data.viewer_liked ?? false}
               />
             </div>

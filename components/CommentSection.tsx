@@ -1,14 +1,18 @@
 "use client";
 
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type Comment = {
   id: number;
   content: string;
   author_name: string;
+  can_delete?: boolean;
 };
 
 export default function CommentSection({ recipeId }: { recipeId: string }) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [comments, setComments] = useState<Comment[]>([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -43,6 +47,13 @@ export default function CommentSection({ recipeId }: { recipeId: string }) {
         body: JSON.stringify({ content: text }),
       });
 
+      if (res.status === 401) {
+        router.push(
+          `/auth/login?next=${encodeURIComponent(pathname || "/recipes")}`,
+        );
+        return;
+      }
+
       if (!res.ok) {
         throw new Error("Unable to add comment.");
       }
@@ -62,9 +73,22 @@ export default function CommentSection({ recipeId }: { recipeId: string }) {
   };
 
   const handleDelete = async (id: number) => {
-    await fetch(`/api/comments/${id}`, {
+    setError("");
+
+    const res = await fetch(`/api/comments/${id}`, {
       method: "DELETE",
     });
+
+    if (!res.ok) {
+      if (res.status === 403) {
+        setError("You can only delete your own comments.");
+      } else if (res.status === 401) {
+        setError("Please login to delete comments.");
+      } else {
+        setError("Unable to delete comment right now.");
+      }
+      return;
+    }
 
     setComments((prev) => prev.filter((x) => x.id !== id));
   };
@@ -117,14 +141,16 @@ export default function CommentSection({ recipeId }: { recipeId: string }) {
                 {c.content}
               </p>
 
-              <div className="mt-3">
-                <button
-                  onClick={() => handleDelete(c.id)}
-                  className="text-xs font-medium text-red-600 transition hover:text-red-700"
-                >
-                  Delete
-                </button>
-              </div>
+              {c.can_delete ? (
+                <div className="mt-3">
+                  <button
+                    onClick={() => handleDelete(c.id)}
+                    className="text-xs font-medium text-red-600 transition hover:text-red-700"
+                  >
+                    Delete
+                  </button>
+                </div>
+              ) : null}
             </article>
           ))}
         </div>

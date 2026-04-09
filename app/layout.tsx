@@ -26,6 +26,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const currentUser = await getCurrentUser();
+  const createRecipeHref = currentUser
+    ? "/recipes/new"
+    : "/auth/login?next=%2Frecipes%2Fnew";
 
   return (
     <html
@@ -104,7 +107,7 @@ export default async function RootLayout({
                 </li>
                 <li>
                   <Link
-                    href="/recipes/new"
+                    href={createRecipeHref}
                     className="transition hover:text-orange-700"
                   >
                     Create Recipe

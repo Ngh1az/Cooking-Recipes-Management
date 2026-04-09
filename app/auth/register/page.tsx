@@ -51,7 +51,7 @@ export default function RegisterPage() {
       }
 
       setMessage(
-        "Registration successful. Please verify email with the link generated in server logs, then login.",
+        "Registration successful. Please verify your email, then login.",
       );
 
       setTimeout(() => {

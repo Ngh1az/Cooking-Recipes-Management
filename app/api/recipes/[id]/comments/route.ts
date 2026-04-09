@@ -7,11 +7,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+  const currentUser = await getCurrentUser();
 
   const result = await pool.query(
     `SELECT
        id,
        content,
+       user_id,
        COALESCE(author_name, 'Guest') AS author_name
      FROM comments
      WHERE recipe_id = $1
@@ -19,7 +21,14 @@ export async function GET(
     [id],
   );
 
-  return NextResponse.json({ data: result.rows });
+  return NextResponse.json({
+    data: result.rows.map((row) => ({
+      id: row.id,
+      content: row.content,
+      author_name: row.author_name,
+      can_delete: !!currentUser && Number(row.user_id) === currentUser.id,
+    })),
+  });
 }
 
 export async function POST(
@@ -30,8 +39,13 @@ export async function POST(
   const body = await req.json();
   const content = (body?.content ?? "").toString().trim();
   const currentUser = await getCurrentUser();
-  const authorName = currentUser?.displayName || "Guest";
-  const userId = currentUser?.id ?? null;
+
+  if (!currentUser) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  const authorName = currentUser.displayName;
+  const userId = currentUser.id;
 
   if (!content) {
     return NextResponse.json(
@@ -43,9 +57,21 @@ export async function POST(
   const result = await pool.query(
     `INSERT INTO comments (recipe_id, content, user_id, author_name)
      VALUES ($1, $2, $3, $4)
-     RETURNING id, content, COALESCE(author_name, 'Guest') AS author_name`,
+     RETURNING id, content, user_id, COALESCE(author_name, 'Guest') AS author_name`,
     [id, content, userId, authorName],
   );
 
-  return NextResponse.json({ data: result.rows[0] }, { status: 201 });
+  const inserted = result.rows[0];
+
+  return NextResponse.json(
+    {
+      data: {
+        id: inserted.id,
+        content: inserted.content,
+        author_name: inserted.author_name,
+        can_delete: true,
+      },
+    },
+    { status: 201 },
+  );
 }

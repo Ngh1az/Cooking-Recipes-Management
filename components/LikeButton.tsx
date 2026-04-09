@@ -5,20 +5,26 @@ import { useState } from "react";
 
 export default function LikeButton({
   id,
-  initialLikes,
   initialLiked = false,
   variant = "default",
 }: {
   id: string;
-  initialLikes: number;
   initialLiked?: boolean;
   variant?: "default" | "compact";
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [likes, setLikes] = useState(initialLikes);
   const [liked, setLiked] = useState(initialLiked);
   const [pending, setPending] = useState(false);
+
+  const baseClass =
+    variant === "compact"
+      ? "inline-flex items-center rounded-full border px-2.5 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-70"
+      : "inline-flex items-center rounded-full border px-3.5 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-70";
+
+  const stateClass = liked
+    ? "border-red-700 bg-red-600 text-white shadow-sm"
+    : "border-gray-300 bg-white text-gray-700 hover:border-red-300 hover:bg-red-50";
 
   const handleLike = async () => {
     if (pending) return;
@@ -43,12 +49,6 @@ export default function LikeButton({
 
       const data = await res.json();
 
-      if (typeof data?.likes === "number") {
-        setLikes(data.likes);
-      } else {
-        setLikes((prev) => (liked ? Math.max(0, prev - 1) : prev + 1));
-      }
-
       if (typeof data?.liked === "boolean") {
         setLiked(data.liked);
       } else {
@@ -64,31 +64,14 @@ export default function LikeButton({
       type="button"
       onClick={handleLike}
       disabled={pending}
-      className={
-        variant === "compact"
-          ? `inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-70 ${
-              liked
-                ? "border-orange-300 bg-orange-100 text-orange-800"
-                : "border-orange-200 bg-white text-gray-700 hover:bg-orange-50"
-            }`
-          : `inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-70 ${
-              liked
-                ? "border-orange-300 bg-orange-100 text-orange-800"
-                : "border-orange-200 bg-white text-gray-700 hover:bg-orange-50"
-            }`
-      }
+      aria-pressed={liked}
+      aria-label={liked ? "Remove from favorites" : "Save to favorites"}
+      title={liked ? "Saved" : "Save"}
+      className={`${baseClass} ${stateClass}`}
     >
-      <span aria-hidden="true">❤️</span>
-      <span>{likes}</span>
-      {variant === "compact" ? null : (
-        <span className="text-xs text-gray-500">
-          {pending
-            ? "Saving..."
-            : liked
-              ? "Click again to unlike"
-              : "Like this recipe"}
-        </span>
-      )}
+      <span aria-hidden="true" className="text-base leading-none">
+        {liked ? "♥" : "♡"}
+      </span>
     </button>
   );
 }

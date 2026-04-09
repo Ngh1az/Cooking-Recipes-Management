@@ -5,7 +5,7 @@ import type { CSSProperties } from "react";
 
 export default async function Home() {
   const currentUser = await getCurrentUser();
-  const exploreHref = currentUser ? "/recipes" : "/auth/login?next=%2Frecipes";
+  const exploreHref = "/recipes";
   const newRecipeHref = currentUser
     ? "/recipes/new"
     : "/auth/login?next=%2Frecipes%2Fnew";

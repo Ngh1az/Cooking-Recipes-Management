@@ -5,11 +5,30 @@ import {
   validatePassword,
 } from "@/lib/auth";
 import { getBaseUrl } from "@/lib/get-base-url";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { sendVerificationEmail } from "@/lib/email";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req);
+    const rateLimit = await checkRateLimit({
+      key: `auth:register:${ip}`,
+      limit: 5,
+      windowMs: 60 * 1000,
+    });
+
+    if (!rateLimit.ok) {
+      return NextResponse.json(
+        { error: "Too many registration attempts. Please try again later." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+        },
+      );
+    }
+
     const body = await req.json();
     const email = (body?.email ?? "").toString().trim();
     const username = (body?.username ?? "").toString().trim();
@@ -66,15 +85,15 @@ export async function POST(req: Request) {
       : null;
 
     if (verificationUrl) {
-      console.log(
-        `[Auth] Email verification link for ${email}: ${verificationUrl}`,
-      );
+      await sendVerificationEmail({
+        to: email,
+        verifyUrl: verificationUrl,
+      });
     }
 
     return NextResponse.json({
       user,
       requiresEmailVerification: true,
-      verificationUrl,
     });
   } catch (error) {
     const isDuplicateConstraint =

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getBaseUrl } from "@/lib/get-base-url";
+import { getCurrentUser } from "@/lib/auth";
 import LikeButton from "@/components/LikeButton";
 import type { CSSProperties } from "react";
 
@@ -12,9 +13,19 @@ type Recipe = {
   image_url: string | null;
   image_urls?: string[];
   likes: number;
+  average_rating?: number;
+  rating_count?: number;
   viewer_liked: boolean;
   viewer_can_edit?: boolean;
 };
+
+function formatRating(value: number): string {
+  if (!Number.isFinite(value) || value <= 0) {
+    return "New";
+  }
+
+  return value.toFixed(1);
+}
 
 export default async function Page({
   searchParams,
@@ -25,6 +36,10 @@ export default async function Page({
   const q = resolvedSearchParams?.q ?? "";
   const parsedPage = Number.parseInt(resolvedSearchParams?.page ?? "1", 10);
   const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
+  const currentUser = await getCurrentUser();
+  const createRecipeHref = currentUser
+    ? "/recipes/new"
+    : "/auth/login?next=%2Frecipes%2Fnew";
 
   const res = await fetch(
     `${getBaseUrl()}/api/recipes?q=${encodeURIComponent(q)}&page=${page}&limit=6`,
@@ -66,7 +81,7 @@ export default async function Page({
         </div>
 
         <Link
-          href="/recipes/new"
+          href={createRecipeHref}
           className="fx-lift inline-flex items-center justify-center rounded-md bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-orange-700"
         >
           <svg
@@ -149,7 +164,6 @@ export default async function Page({
                 <div className="absolute right-3 top-3">
                   <LikeButton
                     id={String(r.id)}
-                    initialLikes={r.likes ?? 0}
                     initialLiked={r.viewer_liked ?? false}
                     variant="compact"
                   />
@@ -167,8 +181,11 @@ export default async function Page({
                 </p>
 
                 <div className="mt-5 flex items-center gap-2">
-                  <span className="inline-flex items-center rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-700">
-                    {r.likes ?? 0} likes
+                  <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+                    ⭐ {formatRating(Number(r.average_rating ?? 0))}
+                    {Number(r.rating_count ?? 0) > 0
+                      ? ` (${Number(r.rating_count ?? 0)})`
+                      : ""}
                   </span>
                 </div>
 

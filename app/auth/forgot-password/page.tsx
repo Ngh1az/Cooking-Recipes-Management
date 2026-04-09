@@ -28,7 +28,7 @@ export default function ForgotPasswordPage() {
       }
 
       setMessage(
-        "If this email exists, a reset link was generated in server logs.",
+        "If this email exists, a password reset link has been issued.",
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unexpected error.");

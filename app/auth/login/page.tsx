@@ -4,10 +4,18 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
+function sanitizeNextPath(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) {
+    return "/recipes";
+  }
+
+  return value;
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextPath = searchParams.get("next") || "/recipes";
+  const nextPath = sanitizeNextPath(searchParams.get("next"));
   const oauthError = searchParams.get("error") || "";
 
   const [email, setEmail] = useState("");

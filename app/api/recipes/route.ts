@@ -98,12 +98,62 @@ export async function GET(req: Request) {
     likedSet = new Set(likedResult.rows.map((row) => Number(row.recipe_id)));
   }
 
-  const rowsWithViewerLiked = result.rows.map((row) => ({
-    ...row,
-    viewer_liked: likedSet.has(Number(row.id)),
-    viewer_can_edit:
-      !!currentUser && Number(row.created_by_user_id) === currentUser.id,
-  }));
+  let ratingMap = new Map<
+    number,
+    { averageRating: number; ratingCount: number }
+  >();
+
+  if (recipeIds.length > 0) {
+    try {
+      const ratingsResult = await pool.query<{
+        recipe_id: number;
+        average_rating: string;
+        rating_count: string;
+      }>(
+        `SELECT
+           recipe_id,
+           COALESCE(AVG(rating)::numeric(10,2), 0)::text AS average_rating,
+           COUNT(*)::text AS rating_count
+         FROM user_recipe_ratings
+         WHERE recipe_id = ANY($1::int[])
+         GROUP BY recipe_id`,
+        [recipeIds],
+      );
+
+      ratingMap = new Map(
+        ratingsResult.rows.map((row) => [
+          Number(row.recipe_id),
+          {
+            averageRating: Number(row.average_rating ?? 0),
+            ratingCount: Number(row.rating_count ?? 0),
+          },
+        ]),
+      );
+    } catch (error) {
+      const missingTableError =
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        error.code === "42P01";
+
+      if (!missingTableError) {
+        throw error;
+      }
+    }
+  }
+
+  const rowsWithViewerLiked = result.rows.map((row) => {
+    const rating = ratingMap.get(Number(row.id));
+
+    return {
+      ...row,
+      viewer_liked: likedSet.has(Number(row.id)),
+      viewer_can_edit:
+        !!currentUser && Number(row.created_by_user_id) === currentUser.id,
+      average_rating: rating?.averageRating ?? 0,
+      rating_count: rating?.ratingCount ?? 0,
+    };
+  });
 
   return NextResponse.json({
     data: rowsWithViewerLiked,

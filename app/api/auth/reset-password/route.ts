@@ -1,10 +1,28 @@
 import { NextResponse } from "next/server";
 import { resetPasswordByToken, validatePassword } from "@/lib/auth";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req);
+    const rateLimit = await checkRateLimit({
+      key: `auth:reset-password:${ip}`,
+      limit: 10,
+      windowMs: 60 * 1000,
+    });
+
+    if (!rateLimit.ok) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+        },
+      );
+    }
+
     const body = await req.json();
     const token = (body?.token ?? "").toString().trim();
     const password = (body?.password ?? "").toString();

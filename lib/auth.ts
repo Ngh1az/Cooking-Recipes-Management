@@ -163,6 +163,36 @@ async function ensureAuthSchema() {
           ON user_likes(user_id)
         `);
 
+        await client.query(`
+          DELETE FROM user_likes ul
+          WHERE NOT EXISTS (
+            SELECT 1 FROM recipes r WHERE r.id = ul.recipe_id
+          )
+        `);
+
+        await client.query(`
+          ALTER TABLE user_likes
+          DROP CONSTRAINT IF EXISTS user_likes_recipe_id_fkey
+        `);
+
+        await client.query(`
+          DO $$
+          BEGIN
+            IF NOT EXISTS (
+              SELECT 1
+              FROM pg_constraint
+              WHERE conname = 'user_likes_recipe_id_fkey'
+            ) THEN
+              ALTER TABLE user_likes
+              ADD CONSTRAINT user_likes_recipe_id_fkey
+              FOREIGN KEY (recipe_id)
+              REFERENCES recipes(id)
+              ON DELETE CASCADE;
+            END IF;
+          END
+          $$;
+        `);
+
         await client.query("COMMIT");
       } catch (error) {
         await client.query("ROLLBACK");

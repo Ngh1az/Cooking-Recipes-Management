@@ -41,6 +41,57 @@ async function ensureRecipeRatingSchema() {
           ON user_recipe_ratings(user_id)
         `);
 
+        await client.query(`
+          DELETE FROM user_recipe_ratings urr
+          WHERE NOT EXISTS (
+            SELECT 1 FROM recipes r WHERE r.id = urr.recipe_id
+          )
+        `);
+
+        await client.query(`
+          ALTER TABLE user_recipe_ratings
+          DROP CONSTRAINT IF EXISTS user_recipe_ratings_recipe_id_fkey
+        `);
+
+        await client.query(`
+          DO $$
+          BEGIN
+            IF NOT EXISTS (
+              SELECT 1
+              FROM pg_constraint
+              WHERE conname = 'user_recipe_ratings_recipe_id_fkey'
+            ) THEN
+              ALTER TABLE user_recipe_ratings
+              ADD CONSTRAINT user_recipe_ratings_recipe_id_fkey
+              FOREIGN KEY (recipe_id)
+              REFERENCES recipes(id)
+              ON DELETE CASCADE;
+            END IF;
+          END
+          $$;
+        `);
+
+        await client.query(`
+          ALTER TABLE user_recipe_ratings
+          DROP CONSTRAINT IF EXISTS user_recipe_ratings_rating_check
+        `);
+
+        await client.query(`
+          DO $$
+          BEGIN
+            IF NOT EXISTS (
+              SELECT 1
+              FROM pg_constraint
+              WHERE conname = 'user_recipe_ratings_rating_1_5_check'
+            ) THEN
+              ALTER TABLE user_recipe_ratings
+              ADD CONSTRAINT user_recipe_ratings_rating_1_5_check
+              CHECK (rating >= 1 AND rating <= 5);
+            END IF;
+          END
+          $$;
+        `);
+
         await client.query("COMMIT");
       } catch (error) {
         await client.query("ROLLBACK");

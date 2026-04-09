@@ -1,5 +1,26 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Environment Variables
+
+Configure the following variables before running in production:
+
+```bash
+# App URL and database
+NEXT_PUBLIC_APP_URL=https://your-domain.example
+DATABASE_URL=postgres://...
+
+# Redis-backed rate limiting
+REDIS_URL=redis://localhost:6379
+
+# Email provider integration
+EMAIL_PROVIDER=sendgrid # or postmark or ses
+EMAIL_FROM=no-reply@your-domain.example
+SENDGRID_API_KEY=SG...
+# POSTMARK_SERVER_TOKEN=...
+# POSTMARK_MESSAGE_STREAM=outbound
+# AWS_REGION=ap-southeast-1
+```
+
 ## Getting Started
 
 First, run the development server:
