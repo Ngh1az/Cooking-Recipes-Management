@@ -2,6 +2,16 @@ import { pool } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 
+function normalizeTextList(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((entry) => String(entry ?? "").trim())
+    .filter((entry) => entry.length > 0);
+}
+
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -93,14 +103,85 @@ export async function GET(
     }
   }
 
+  const viewerCanEdit =
+    !!currentUser &&
+    Number(recipe.rows[0]?.created_by_user_id) === currentUser.id;
+
   return NextResponse.json({
     data: recipe.rows[0],
     likes: Number(likes.rows[0].count),
     viewer_liked: viewerLiked,
+    viewer_can_edit: viewerCanEdit,
     average_rating: averageRating,
     rating_count: ratingCount,
     viewer_rating: viewerRating,
   });
+}
+
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  const body = await req.json();
+  const title = (body?.title ?? "").toString().trim();
+  const description = (body?.description ?? "").toString().trim();
+  const ingredients = normalizeTextList(body?.ingredients);
+  const steps = normalizeTextList(body?.steps);
+  const image_urls = normalizeTextList(body?.image_urls);
+  const video_urls = normalizeTextList(body?.video_urls);
+  const image_url = (body?.image_url ?? image_urls[0] ?? null) as string | null;
+
+  if (!title || !description) {
+    return NextResponse.json(
+      { error: "Title and description are required." },
+      { status: 400 },
+    );
+  }
+
+  const ownership = await pool.query<{
+    id: number;
+    created_by_user_id: number | null;
+  }>("SELECT id, created_by_user_id FROM recipes WHERE id = $1", [id]);
+
+  if (!ownership.rows[0]) {
+    return NextResponse.json({ error: "Recipe not found." }, { status: 404 });
+  }
+
+  if (ownership.rows[0].created_by_user_id !== currentUser.id) {
+    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  }
+
+  const result = await pool.query(
+    `UPDATE recipes
+     SET title = $1,
+         description = $2,
+         ingredients = $3,
+         steps = $4,
+         image_url = $5,
+         image_urls = $6,
+         video_urls = $7
+     WHERE id = $8
+     RETURNING *`,
+    [
+      title,
+      description,
+      ingredients,
+      steps,
+      image_url,
+      image_urls,
+      video_urls,
+      id,
+    ],
+  );
+
+  return NextResponse.json({ data: result.rows[0] });
 }
 
 export async function DELETE(
@@ -108,6 +189,24 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  const ownership = await pool.query<{ created_by_user_id: number | null }>(
+    "SELECT created_by_user_id FROM recipes WHERE id = $1",
+    [id],
+  );
+
+  if (!ownership.rows[0]) {
+    return NextResponse.json({ error: "Recipe not found." }, { status: 404 });
+  }
+
+  if (ownership.rows[0].created_by_user_id !== currentUser.id) {
+    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  }
 
   await pool.query("DELETE FROM comments WHERE recipe_id = $1", [id]);
   await pool.query("DELETE FROM user_likes WHERE recipe_id = $1", [id]);

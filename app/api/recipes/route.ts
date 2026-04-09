@@ -101,6 +101,8 @@ export async function GET(req: Request) {
   const rowsWithViewerLiked = result.rows.map((row) => ({
     ...row,
     viewer_liked: likedSet.has(Number(row.id)),
+    viewer_can_edit:
+      !!currentUser && Number(row.created_by_user_id) === currentUser.id,
   }));
 
   return NextResponse.json({

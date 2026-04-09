@@ -314,17 +314,25 @@ export default async function Page({
             </dl>
           </section>
 
-          <section className="rounded-2xl border border-red-100 bg-red-50/50 p-5">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-red-700">
-              Manage Recipe
-            </h2>
-            <p className="mt-2 text-sm text-red-700/80">
-              Remove this recipe if it is outdated or incorrect.
-            </p>
-            <div className="mt-3">
-              <DeleteRecipeButton id={resolvedParams.id} />
-            </div>
-          </section>
+          {data.viewer_can_edit ? (
+            <section className="rounded-2xl border border-red-100 bg-red-50/50 p-5">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-red-700">
+                Manage Recipe
+              </h2>
+              <p className="mt-2 text-sm text-red-700/80">
+                Update this recipe or remove it if it is outdated or incorrect.
+              </p>
+              <div className="mt-3 flex flex-col gap-2">
+                <Link
+                  href={`/recipes/${resolvedParams.id}/edit`}
+                  className="inline-flex items-center justify-center rounded-lg border border-orange-200 bg-white px-4 py-2 text-sm font-medium text-orange-700 transition hover:bg-orange-50"
+                >
+                  Edit recipe
+                </Link>
+                <DeleteRecipeButton id={resolvedParams.id} />
+              </div>
+            </section>
+          ) : null}
         </aside>
       </div>
 
